@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Retrace — screen recorder that explains",
+  "version": "0.1.0",
+  "description": "Record your screen. Retrace watches the pixels and writes the explanation: summaries, step-by-step guides, and bug reports.",
+  "minimum_chrome_version": "120",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Retrace"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "tabCapture",
+    "storage",
+    "offscreen",
+    "scripting",
+    "downloads"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "commands": {
+    "toggle-recording": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+U",
+        "mac": "Command+Shift+U"
+      },
+      "description": "Start/stop recording"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:3000/auth/extension*",
+        "https://app.retrace.so/auth/extension*"
+      ],
+      "js": [
+        "connect.js"
+      ]
+    }
+  ]
+}
