@@ -23,7 +23,7 @@ async function main() {
   $("save").onclick = () => {
     const a = document.createElement("a");
     a.href = video.src;
-    a.download = `retrace-${Date.now()}.webm`;
+    a.download = `scenerecap-${Date.now()}.webm`;
     a.click();
   };
 
@@ -54,7 +54,7 @@ async function main() {
           sourceMeta: { source: "extension", version: chrome.runtime.getManifest().version },
         },
       });
-      status.innerHTML = `Processing started ✓ — <a href="${APP_URL}/dashboard/r/${recording.id}" target="_blank">open in Retrace</a>`;
+      status.innerHTML = `Processing started ✓ — <a href="${APP_URL}/dashboard/r/${recording.id}" target="_blank">open in SceneRecap</a>`;
       await chrome.storage.session.remove("review");
     } catch (e) {
       status.textContent = e instanceof Error ? e.message : "Upload failed";

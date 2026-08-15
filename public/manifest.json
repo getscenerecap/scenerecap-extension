@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Retrace — screen recorder that explains",
+  "name": "SceneRecap — screen recorder that explains",
   "version": "0.1.0",
-  "description": "Record your screen. Retrace watches the pixels and writes the explanation: summaries, step-by-step guides, and bug reports.",
+  "description": "Record your screen. SceneRecap watches the pixels and writes the explanation: summaries, step-by-step guides, and bug reports.",
   "minimum_chrome_version": "120",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Retrace"
+    "default_title": "SceneRecap"
   },
   "background": {
     "service_worker": "background.js"
@@ -44,7 +44,7 @@
     {
       "matches": [
         "http://localhost:3000/auth/extension*",
-        "https://app.retrace.so/auth/extension*"
+        "https://scenerecap.com/auth/extension*"
       ],
       "js": [
         "connect.js"

@@ -5,8 +5,8 @@
  * - URLs: path only (query stripped)
  */
 (() => {
-  if ((window as unknown as { __retraceTelemetry?: boolean }).__retraceTelemetry) return;
-  (window as unknown as { __retraceTelemetry?: boolean }).__retraceTelemetry = true;
+  if ((window as unknown as { __scenerecapTelemetry?: boolean }).__scenerecapTelemetry) return;
+  (window as unknown as { __scenerecapTelemetry?: boolean }).__scenerecapTelemetry = true;
 
   let active = true;
   const send = (event: Record<string, unknown>) => {
@@ -127,7 +127,7 @@
   const seenConsole = new Set<string>();
   const script = document.createElement("script");
   script.textContent = `(${(() => {
-    const post = (detail: unknown) => window.dispatchEvent(new CustomEvent("__retrace_evt", { detail }));
+    const post = (detail: unknown) => window.dispatchEvent(new CustomEvent("__scenerecap_evt", { detail }));
     const origError = console.error.bind(console);
     console.error = (...args: unknown[]) => {
       try { post({ type: "console", level: "error", message: args.map((a) => String(a)).join(" ").slice(0, 2000) }); } catch {}
@@ -155,7 +155,7 @@
   document.documentElement.appendChild(script);
   script.remove();
 
-  window.addEventListener("__retrace_evt", ((e: CustomEvent) => {
+  window.addEventListener("__scenerecap_evt", ((e: CustomEvent) => {
     const d = e.detail as { type: string; message?: string };
     if (d.type === "console") {
       const key = (d.message ?? "").slice(0, 100);
