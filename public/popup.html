@@ -4,27 +4,27 @@
   <meta charset="utf-8" />
   <style>
     :root { color-scheme: dark; }
-    body { width: 300px; margin: 0; font-family: Inter, system-ui, sans-serif; background: #0b0b14; color: #e2e8f0; }
+    body { width: 300px; margin: 0; font-family: Inter, system-ui, sans-serif; background: #0a0b0c; color: #e4e4e7; }
     .wrap { padding: 16px; }
     .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; color: #fff; margin-bottom: 14px; }
-    .logo .accent { color: #818cf8; }
-    .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #94a3b8; }
+    .logo .accent { color: #3ee0c1; }
+    .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #a1a1aa; }
     select, .btn { width: 100%; box-sizing: border-box; }
-    select { background: #12121f; color: #e2e8f0; border: 1px solid #232338; border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; }
-    label.mic { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+    select { background: #111315; color: #e4e4e7; border: 1px solid #23272b; border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; }
+    label.mic { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #a1a1aa; margin-bottom: 14px; }
     .btn { border: 0; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
-    .btn.start { background: #4f46e5; color: #fff; }
-    .btn.start:hover { background: #6366f1; }
+    .btn.start { background: #17c9a8; color: #0a0b0c; }
+    .btn.start:hover { background: #3ee0c1; }
     .btn.stop { background: #dc2626; color: #fff; }
-    .hint { margin-top: 10px; font-size: 11px; color: #64748b; text-align: center; min-height: 14px; }
-    #auth-row { font-size: 11px; color: #64748b; margin-top: 12px; text-align: center; }
-    #auth-row a { color: #818cf8; }
+    .hint { margin-top: 10px; font-size: 11px; color: #71717a; text-align: center; min-height: 14px; }
+    #auth-row { font-size: 11px; color: #71717a; margin-top: 12px; text-align: center; }
+    #auth-row a { color: #3ee0c1; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="logo">
-      <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="1" y="1" width="30" height="30" rx="8" fill="#1e1b4b" stroke="#4f46e5" stroke-width="1.5"/><path d="M23 8 C15 8 9 11 9 16 c0 5 6 8 14 8" stroke="#a5b4fc" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M12 20.5 L9 24 L14 24.5 Z" fill="#f59e0b"/><circle cx="23" cy="8" r="2.4" fill="#6366f1"/></svg>
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="1" y="1" width="30" height="30" rx="8" fill="#111315" stroke="#2f353a" stroke-width="1.5"/><path d="M9 22.5 C9 15.5 13.5 11 20.5 11" stroke="#3ee0c1" stroke-width="2.6" stroke-linecap="round" fill="none"/><path d="M8.2 18.6 L9 22.9 L13.2 21.9" stroke="#3ee0c1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="22.5" cy="10" r="4.4" fill="#ff5a5f" opacity="0.28"/><circle cx="22.5" cy="10" r="2.6" fill="#ff5a5f"/></svg>
       re<span class="accent">trace</span>
     </div>
     <div class="row"><span>AI mode</span></div>
