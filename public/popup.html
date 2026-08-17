@@ -4,27 +4,27 @@
   <meta charset="utf-8" />
   <style>
     :root { color-scheme: dark; }
-    body { width: 300px; margin: 0; font-family: Inter, system-ui, sans-serif; background: #0a0b0c; color: #e4e4e7; }
+    body { width: 300px; margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #F5F2EB; color: #14130F; }
     .wrap { padding: 16px; }
     .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; color: #fff; margin-bottom: 14px; }
-    .logo .accent { color: #3ee0c1; }
-    .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #a1a1aa; }
+    .logo .accent { color: #2340C6; }
+    .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #5F5B53; }
     select, .btn { width: 100%; box-sizing: border-box; }
-    select { background: #111315; color: #e4e4e7; border: 1px solid #23272b; border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; }
-    label.mic { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #a1a1aa; margin-bottom: 14px; }
+    select { background: #FFFFFF; color: #14130F; border: 1px solid rgba(20,19,15,.18); border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; }
+    label.mic { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #5F5B53; margin-bottom: 14px; }
     .btn { border: 0; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
-    .btn.start { background: #17c9a8; color: #0a0b0c; }
-    .btn.start:hover { background: #3ee0c1; }
+    .btn.start { background: #14130F; color: #F5F2EB; }
+    .btn.start:hover { background: #26241F; }
     .btn.stop { background: #dc2626; color: #fff; }
-    .hint { margin-top: 10px; font-size: 11px; color: #71717a; text-align: center; min-height: 14px; }
-    #auth-row { font-size: 11px; color: #71717a; margin-top: 12px; text-align: center; }
-    #auth-row a { color: #3ee0c1; }
+    .hint { margin-top: 10px; font-size: 11px; color: #625E56; text-align: center; min-height: 14px; }
+    #auth-row { font-size: 11px; color: #625E56; margin-top: 12px; text-align: center; }
+    #auth-row a { color: #2340C6; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="logo">
-      <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="1" y="1" width="30" height="30" rx="8" fill="#111315" stroke="#2f353a" stroke-width="1.5"/><path d="M9 22.5 C9 15.5 13.5 11 20.5 11" stroke="#3ee0c1" stroke-width="2.6" stroke-linecap="round" fill="none"/><path d="M8.2 18.6 L9 22.9 L13.2 21.9" stroke="#3ee0c1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="22.5" cy="10" r="4.4" fill="#ff5a5f" opacity="0.28"/><circle cx="22.5" cy="10" r="2.6" fill="#ff5a5f"/></svg>
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="1" y="1" width="30" height="30" rx="8" fill="#14130F" stroke="#3D3A33" stroke-width="1.5"/><path d="M9 22.5 C9 15.5 13.5 11 20.5 11" stroke="#7B92F2" stroke-width="2.6" stroke-linecap="round" fill="none"/><path d="M8.2 18.6 L9 22.9 L13.2 21.9" stroke="#7B92F2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="22.5" cy="10" r="4.4" fill="#ff5a5f" opacity="0.28"/><circle cx="22.5" cy="10" r="2.6" fill="#ff5a5f"/></svg>
       Scene<span class="accent">Recap</span>
     </div>
     <div class="row"><span>AI mode</span></div>
