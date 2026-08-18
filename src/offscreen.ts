@@ -13,7 +13,9 @@ chrome.runtime.onMessage.addListener((msg: { kind: string; streamId?: string; mi
         stream = await (navigator.mediaDevices as MediaDevices & { getUserMedia: typeof navigator.mediaDevices.getUserMedia }).getUserMedia({
           video: {
             // @ts-expect-error chrome-specific constraints
-            mandatory: { chromeMediaSource: "tab", chromeMediaSourceId: msg.streamId, maxFrameRate: 30 },
+            // Cap at 1080p/30: Retina tabs otherwise capture at 2x device pixels (2880x1800+), which
+            // multiplies upload size and makes the server transcode crawl; 1080p is plenty for the AI passes.
+            mandatory: { chromeMediaSource: "tab", chromeMediaSourceId: msg.streamId, maxWidth: 1920, maxHeight: 1080, maxFrameRate: 30 },
           },
           audio: {
             // @ts-expect-error chrome-specific constraints
@@ -40,7 +42,7 @@ chrome.runtime.onMessage.addListener((msg: { kind: string; streamId?: string; mi
         }
 
         chunks = [];
-        recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9,opus", videoBitsPerSecond: 8_000_000 });
+        recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9,opus", videoBitsPerSecond: 5_000_000 });
         recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
         recorder.start(5000); // 5s timeslice (§3.6)
         sendResponse({ ok: true });
