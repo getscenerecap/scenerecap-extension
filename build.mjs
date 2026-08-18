@@ -2,7 +2,8 @@ import * as esbuild from "esbuild";
 import { cpSync, mkdirSync } from "node:fs";
 
 const watch = process.argv.includes("--watch");
-mkdirSync("dist", { recursive: true });
+const OUT = process.env.OUT_DIR ?? "dist";
+mkdirSync(OUT, { recursive: true });
 
 const ctx = await esbuild.context({
   entryPoints: {
@@ -14,7 +15,7 @@ const ctx = await esbuild.context({
     connect: "src/connect.ts",
   },
   bundle: true,
-  outdir: "dist",
+  outdir: OUT,
   format: "iife",
   target: "chrome120",
   minify: !watch,
@@ -22,7 +23,7 @@ const ctx = await esbuild.context({
 });
 
 await ctx.rebuild();
-cpSync("public", "dist", { recursive: true });
-console.log("extension built -> dist/");
+cpSync("public", OUT, { recursive: true });
+console.log(`extension built -> ${OUT}/`);
 if (watch) await ctx.watch();
 else await ctx.dispose();
