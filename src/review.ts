@@ -27,17 +27,23 @@ async function main() {
     a.click();
   };
 
-  $("upload").onclick = async () => {
+  // Upload runs as a function so it can be triggered by the button OR resumed automatically once the
+  // sign-in hand-off lands (the auth/extension page writes tokens into chrome.storage.local).
+  let uploading = false;
+  let wantedUpload = false;
+  const doUpload = async () => {
+    if (uploading) return;
     const btn = $("upload") as HTMLButtonElement;
-    btn.disabled = true;
     const status = $("status");
+    const { accessToken } = await getTokens();
+    if (!accessToken) {
+      wantedUpload = true;
+      status.innerHTML = `Sign in to upload — <a href="${APP_URL}/auth/extension" target="_blank">open sign-in</a>. This page will continue automatically once you're signed in.`;
+      return;
+    }
+    uploading = true;
+    btn.disabled = true;
     try {
-      const { accessToken } = await getTokens();
-      if (!accessToken) {
-        status.innerHTML = `Sign in first — <a href="${APP_URL}/auth/extension" target="_blank">open sign-in</a>, then click Upload again.`;
-        btn.disabled = false;
-        return;
-      }
       status.textContent = "Uploading video…";
       const mediaId = await uploadBlob(blob, "recording.webm", "video/webm", "media");
       status.textContent = "Uploading activity log…";
@@ -56,11 +62,23 @@ async function main() {
       });
       status.innerHTML = `Processing started ✓ — <a href="${APP_URL}/dashboard/r/${recording.id}" target="_blank">open in SceneRecap</a>`;
       await chrome.storage.session.remove("review");
+      // Take the user to the recording; the library shows live progress until it's ready.
+      await chrome.tabs.create({ url: `${APP_URL}/dashboard/r/${recording.id}` });
     } catch (e) {
       status.textContent = e instanceof Error ? e.message : "Upload failed";
       btn.disabled = false;
+      uploading = false;
     }
   };
+  $("upload").onclick = () => void doUpload();
+
+  // Auto-resume: when the sign-in tab hands tokens to the extension, pick up the pending upload.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.accessToken?.newValue && wantedUpload && !uploading) {
+      wantedUpload = false;
+      void doUpload();
+    }
+  });
 }
 
 void main();
