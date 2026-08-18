@@ -142,11 +142,19 @@ chrome.commands.onCommand.addListener(async (command) => {
   }
 });
 
-// Track SPA navigations of the recorded tab from the privileged side too
+// Track navigations of the recorded tab from the privileged side, and RE-INJECT the telemetry
+// collector after full-page loads: a content script only lives as long as its document, so without
+// this the event log goes silent after the first real navigation (seen on the first prod recording).
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (state.recording && tabId === state.tabId && changeInfo.url) {
+  if (!state.recording || tabId !== state.tabId) return;
+  if (changeInfo.url) {
     const url = new URL(changeInfo.url);
     state.events.push({ type: "navigation", t: Date.now() - state.startedAt, url: url.pathname, title: tab.title?.slice(0, 200), spa: false });
+  }
+  if (changeInfo.status === "loading" || changeInfo.status === "complete") {
+    // content.js guards against double-injection per document; "loading" catches early clicks,
+    // "complete" is the fallback when the document wasn't ready yet.
+    chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] }).catch(() => { /* restricted page */ });
   }
 });
 
