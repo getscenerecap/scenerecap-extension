@@ -36,8 +36,9 @@ the refusal rules. The product's privacy policy is at https://scenerecap.com/leg
 
 `activeTab`, `tabs` (title/URL path of the recorded tab), `tabCapture` (the recording itself), `storage`
 (auth token + settings), `offscreen` (MediaRecorder host), `scripting` (inject the interaction logger),
-`downloads` (Save to disk). Host permission is limited to the SceneRecap API/app origins used for upload and
-sign-in.
+`downloads` (Save to disk). No host permissions are granted at install; `<all_urls>` is listed as an
+**optional** host permission so the interaction logger can be injected into the tab you choose to record
+(granted per Chrome's runtime prompt, used only while recording).
 
 ## Build & load
 
