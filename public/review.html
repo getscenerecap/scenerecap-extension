@@ -4,13 +4,17 @@
   <meta charset="utf-8" />
   <title>Review recording — SceneRecap</title>
   <style>
-    :root { color-scheme: dark; }
-    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #F5F2EB; color: #14130F; }
+    @font-face { font-family: "Bricolage Grotesque"; src: url("fonts/BricolageGrotesque-Variable.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Variable.woff2") format("woff2"); font-weight: 400 700; }
+    @font-face { font-family: "IBM Plex Mono"; src: url("fonts/IBMPlexMono-500.woff2") format("woff2"); font-weight: 500; }
+
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; background: #F5F2EB; color: #14130F; }
     .wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
-    h1 { font-size: 20px; color: #14130F; }
+    h1 { font-size: 22px; color: #14130F; font-family: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif; letter-spacing: -.01em; font-weight: 700; }
     video { width: 100%; border-radius: 12px; border: 1px solid rgba(20,19,15,.16); background: #000; margin: 16px 0; }
     .meta { font-size: 12px; color: #625E56; margin-bottom: 16px; }
-    input, select { background: #FFFFFF; color: #14130F; border: 1px solid rgba(20,19,15,.18); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+    input, select { background: #FFFFFF; color: #14130F; border: 1px solid rgba(20,19,15,.18); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 14px; }
     input { width: 100%; box-sizing: border-box; margin-bottom: 12px; }
     select { margin-bottom: 16px; }
     .actions { display: flex; gap: 10px; }
