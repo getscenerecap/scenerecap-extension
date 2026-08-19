@@ -32,9 +32,12 @@ async function startRecording(opts: { mode: string; mic: boolean }) {
   if (state.recording) return { ok: false, error: "Already recording" };
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) return { ok: false, error: "No active tab" };
-  // Never record restricted or sensitive pages
+  // Never record restricted or sensitive pages, and never in incognito windows (§3.3 privacy)
   if (!tab.url || /^(chrome|edge|about|chrome-extension):/.test(tab.url)) {
     return { ok: false, error: "This page can't be recorded" };
+  }
+  if (tab.incognito) {
+    return { ok: false, error: "Recording is disabled in incognito windows" };
   }
 
   const streamId = await new Promise<string>((resolve, reject) => {
