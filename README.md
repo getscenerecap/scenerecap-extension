@@ -35,8 +35,9 @@ the refusal rules. The product's privacy policy is at https://scenerecap.com/leg
 ## Permissions (from `public/manifest.json`)
 
 `activeTab`, `tabs` (title/URL path of the recorded tab), `tabCapture` (the recording itself), `storage`
-(auth token + settings), `offscreen` (MediaRecorder host), `scripting` (inject the interaction logger),
-`downloads` (Save to disk). No host permissions are granted at install; `<all_urls>` is listed as an
+(auth token + settings), `offscreen` (MediaRecorder host), `scripting` (inject the interaction logger).
+"Save to disk" uses the HTML5 `download` attribute, so no `downloads` permission is required.
+No host permissions are granted at install; `<all_urls>` is listed as an
 **optional** host permission so the interaction logger can be injected into the tab you choose to record
 (granted per Chrome's runtime prompt, used only while recording).
 
