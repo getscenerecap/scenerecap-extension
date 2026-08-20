@@ -3,7 +3,8 @@
 
 let recorder: MediaRecorder | null = null;
 let chunks: Blob[] = [];
-let stream: MediaStream | null = null;
+let stream: MediaStream | null = null; // what MediaRecorder consumes (tab, or tab+mic mix)
+let sourceStreams: MediaStream[] = []; // originals (tab capture, mic) — must ALL be stopped on stop, or the mic stays hot
 
 chrome.runtime.onMessage.addListener((msg: { kind: string; streamId?: string; mic?: boolean }, _sender, sendResponse) => {
   (async () => {
@@ -22,23 +23,26 @@ chrome.runtime.onMessage.addListener((msg: { kind: string; streamId?: string; mi
             mandatory: { chromeMediaSource: "tab", chromeMediaSourceId: msg.streamId },
           },
         });
+        const tab = stream;
+        sourceStreams = [tab];
         // Keep tab audio audible to the user while recording
         try {
           const ctx = new AudioContext();
-          ctx.createMediaStreamSource(stream).connect(ctx.destination);
+          ctx.createMediaStreamSource(tab).connect(ctx.destination);
         } catch { /* non-fatal */ }
 
         if (msg.mic) {
+          // Permission was granted up-front via mic.html (a visible page) — an offscreen document
+          // cannot show the prompt itself, so an ungranted getUserMedia here rejects immediately.
           try {
             const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+            sourceStreams.push(mic);
             const ctx = new AudioContext();
             const dest = ctx.createMediaStreamDestination();
-            ctx.createMediaStreamSource(stream).connect(dest);
+            ctx.createMediaStreamSource(tab).connect(dest);
             ctx.createMediaStreamSource(mic).connect(dest);
-            const mixed = new MediaStream([...stream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
-            stream.getAudioTracks().forEach((t) => mixed.addTrack.bind(mixed)); // video from tab, mixed audio
-            stream = mixed;
-          } catch { /* mic denied -> proceed tab-only */ }
+            stream = new MediaStream([...tab.getVideoTracks(), ...dest.stream.getAudioTracks()]); // video from tab, mixed audio
+          } catch { /* mic revoked between popup check and start -> proceed tab-only */ }
         }
 
         chunks = [];
@@ -59,6 +63,8 @@ chrome.runtime.onMessage.addListener((msg: { kind: string; streamId?: string; mi
         recorder.stop();
         await stopped;
         stream?.getTracks().forEach((t) => t.stop());
+        sourceStreams.forEach((s) => s.getTracks().forEach((t) => t.stop()));
+        sourceStreams = [];
         const blob = new Blob(chunks, { type: "video/webm" });
         const blobUrl = URL.createObjectURL(blob);
         recorder = null;

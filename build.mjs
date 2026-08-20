@@ -11,6 +11,7 @@ const ctx = await esbuild.context({
     content: "src/content.ts",
     offscreen: "src/offscreen.ts",
     popup: "src/popup.ts",
+    mic: "src/mic.ts",
     review: "src/review.ts",
     connect: "src/connect.ts",
   },

@@ -2,6 +2,17 @@ import { api, getTokens, APP_URL } from "./lib/api.js";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
+/** Mic permission must be granted from a visible page (mic.html) — the offscreen document that
+ *  actually records can't show a prompt, its getUserMedia just rejects. */
+async function micGranted(): Promise<boolean> {
+  try {
+    const st = await navigator.permissions.query({ name: "microphone" as PermissionName });
+    return st.state === "granted";
+  } catch {
+    return false;
+  }
+}
+
 async function render() {
   const { accessToken } = await getTokens();
   const state = (await chrome.runtime.sendMessage({ kind: "popup:state" })) as { recording: boolean; startedAt: number };
@@ -22,6 +33,14 @@ async function render() {
     chrome.tabs.create({ url: `${APP_URL}/auth/extension` });
   });
 
+  const micBox = $("mic") as HTMLInputElement;
+  micBox.onchange = async () => {
+    if (micBox.checked && !(await micGranted())) {
+      micBox.checked = false;
+      await chrome.tabs.create({ url: chrome.runtime.getURL("mic.html") });
+    }
+  };
+
   const btn = $("record") as HTMLButtonElement;
   if (state.recording) {
     btn.textContent = "■ Stop recording";
@@ -41,7 +60,13 @@ async function render() {
         window.close();
       } else {
         const mode = ($("mode") as HTMLSelectElement).value;
-        const mic = ($("mic") as HTMLInputElement).checked;
+        const mic = micBox.checked;
+        if (mic && !(await micGranted())) {
+          // Permission revoked since the box was ticked — re-run the grant flow instead of
+          // silently recording without the mic the user asked for.
+          await chrome.tabs.create({ url: chrome.runtime.getURL("mic.html") });
+          throw new Error("Allow the microphone in the tab that opened, then record again.");
+        }
         const res = (await chrome.runtime.sendMessage({ kind: "popup:start", mode, mic })) as { ok: boolean; error?: string };
         if (!res.ok) throw new Error(res.error);
         window.close();
