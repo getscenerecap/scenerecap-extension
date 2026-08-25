@@ -4,7 +4,7 @@
  * - keyboard: modifier combos + special keys only, NEVER plaintext typing
  * - URLs: path only (query stripped)
  */
-(() => {
+(async () => {
   if ((window as unknown as { __scenerecapTelemetry?: boolean }).__scenerecapTelemetry) return;
   (window as unknown as { __scenerecapTelemetry?: boolean }).__scenerecapTelemetry = true;
 
@@ -124,6 +124,15 @@
   emitPageContext();
 
   // ---- console + network errors (page-world hook via event bridge) ----
+  // Gated on the user's capture toggle (§3.3: opt-in, on by default). Read once at injection:
+  // a mid-recording settings change applies from the next recording, which is the understandable
+  // behaviour — a toggle that half-applies to a recording in flight is not.
+  let captureConsole = true;
+  try {
+    const { settings } = (await chrome.storage.local.get("settings")) as { settings?: { captureConsole?: boolean } };
+    if (settings?.captureConsole === false) captureConsole = false;
+  } catch { /* storage unavailable (tests stub chrome) -> default on */ }
+
   const seenConsole = new Set<string>();
   const script = document.createElement("script");
   script.textContent = `(${(() => {
@@ -156,6 +165,7 @@
   script.remove();
 
   window.addEventListener("__scenerecap_evt", ((e: CustomEvent) => {
+    if (!captureConsole) return;
     const d = e.detail as { type: string; message?: string };
     if (d.type === "console") {
       const key = (d.message ?? "").slice(0, 100);

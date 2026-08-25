@@ -26,12 +26,45 @@
     #status { margin-top: 14px; font-size: 13px; color: #5F5B53; min-height: 18px; }
     #status a { color: #2340C6; }
     .privacy { margin-top: 24px; font-size: 11px; color: #5F5B53; }
+    /* Redaction editor */
+    #frame { position: relative; margin: 16px 0 0; }
+    #frame video { margin: 0; display: block; }
+    #frame.blurtool { cursor: crosshair; }
+    .blur-box { position: absolute; border: 1px solid rgba(217,119,6,.8); background: rgba(251,191,36,.3); backdrop-filter: blur(6px); border-radius: 2px; pointer-events: none; }
+    .blur-draft { position: absolute; border: 2px dashed rgba(217,119,6,.9); background: rgba(251,191,36,.2); pointer-events: none; }
+    #edit-tools { display: flex; gap: 8px; align-items: center; margin: 10px 0 6px; flex-wrap: wrap; }
+    .tool { border: 1px solid rgba(20,19,15,.16); background: transparent; color: #5F5B53; border-radius: 8px; padding: 6px 12px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; }
+    .tool[aria-pressed="true"] { border-color: #2340C6; color: #2340C6; background: rgba(35,64,198,.06); }
+    #mark { margin-left: auto; background: transparent; border: 1px solid rgba(20,19,15,.16); color: #3D3A33; font-size: 12px; padding: 6px 12px; font-weight: 500; }
+    #bar { position: relative; height: 26px; border-radius: 8px; background: rgba(20,19,15,.06); cursor: pointer; overflow: hidden; }
+    #bar .cut { position: absolute; top: 0; height: 100%; background: rgba(239,68,68,.3); }
+    #bar .mute { position: absolute; bottom: 0; height: 5px; background: rgba(14,165,233,.7); }
+    #bar .blur { position: absolute; top: 0; height: 5px; background: rgba(245,158,11,.8); }
+    #bar .ph { position: absolute; top: 0; height: 100%; width: 2px; background: #14130F; }
+    #bar .pending { position: absolute; top: 0; height: 100%; width: 1px; background: #2340C6; }
+    #edit-meta { font-size: 11px; color: #625E56; margin: 6px 0 10px; font-family: "IBM Plex Mono", monospace; }
+    #edit-list { list-style: none; margin: 0 0 6px; padding: 0; font-size: 12px; }
+    #edit-list li { display: flex; justify-content: space-between; align-items: center; border-radius: 8px; padding: 5px 10px; margin-bottom: 4px; font-family: "IBM Plex Mono", monospace; }
+    #edit-list li.cut { background: rgba(239,68,68,.07); }
+    #edit-list li.blur { background: rgba(245,158,11,.09); }
+    #edit-list li.mute { background: rgba(14,165,233,.09); }
+    #edit-list button { background: none; border: 0; color: #625E56; font-size: 11px; padding: 2px 4px; }
+    #edit-list button:hover { color: #B91C1C; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Review your recording</h1>
-    <video id="preview" controls></video>
+    <div id="frame"><video id="preview" controls></video></div>
+    <div id="edit-tools" role="tablist" aria-label="Redaction tool">
+      <button class="tool" id="tool-cut" role="tab" aria-pressed="false">Cut</button>
+      <button class="tool" id="tool-blur" role="tab" aria-pressed="false">Blur</button>
+      <button class="tool" id="tool-mute" role="tab" aria-pressed="false">Mute</button>
+      <button id="mark" hidden></button>
+    </div>
+    <div id="bar"></div>
+    <div id="edit-meta"></div>
+    <ul id="edit-list"></ul>
     <div class="meta" id="meta"></div>
     <input id="title-input" placeholder="Title (SceneRecap will suggest one after analysis)" />
     <select id="mode">
@@ -45,7 +78,7 @@
       <button id="save">Save video to disk</button>
     </div>
     <div id="status"></div>
-    <p class="privacy">Passwords are never captured. Plain typing is never logged — only clicks, navigation, and shortcuts. You can delete any recording (and its data) at any time from the dashboard.</p>
+    <p class="privacy">Passwords are never captured. Plain typing is never logged — only clicks, navigation, and shortcuts. Cut, blur or mute above before uploading: edits are applied during processing, cut moments are removed from the activity log too, and the unedited original is deleted once processing succeeds. You can delete any recording (and its data) at any time from the dashboard.</p>
   </div>
   <script src="review.js"></script>
 </body>

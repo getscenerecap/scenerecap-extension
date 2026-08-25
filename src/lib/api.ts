@@ -51,7 +51,7 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
 }
 
 /** Multipart upload of a Blob through presigned part URLs. */
-export async function uploadBlob(blob: Blob, filename: string, contentType: string, kind: "media" | "eventlog"): Promise<string> {
+export async function uploadBlob(blob: Blob, filename: string, contentType: string, kind: "media" | "eventlog" | "redaction_manifest"): Promise<string> {
   const session = await api<{ uploadId: string; partSize: number; parts: { n: number; url: string }[] }>("/v1/uploads", {
     method: "POST",
     body: { filename, sizeBytes: blob.size, contentType, kind },

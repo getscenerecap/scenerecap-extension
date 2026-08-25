@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Settings — SceneRecap</title>
+  <style>
+    @font-face { font-family: "Bricolage Grotesque"; src: url("fonts/BricolageGrotesque-Variable.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Variable.woff2") format("woff2"); font-weight: 400 700; }
+    @font-face { font-family: "IBM Plex Mono"; src: url("fonts/IBMPlexMono-500.woff2") format("woff2"); font-weight: 500; }
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; background: #F5F2EB; color: #14130F; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 32px 24px 48px; }
+    h1 { font-size: 22px; font-family: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif; letter-spacing: -.01em; font-weight: 700; }
+    h2 { font-size: 12px; font-family: "IBM Plex Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: #625E56; font-weight: 500; margin: 28px 0 10px; }
+    p.hint { font-size: 12px; color: #5F5B53; margin: 6px 0 0; line-height: 1.5; }
+    textarea, select { background: #fff; color: #14130F; border: 1px solid rgba(20,19,15,.18); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 14px; width: 100%; box-sizing: border-box; }
+    textarea { font-family: "IBM Plex Mono", monospace; font-size: 12px; min-height: 96px; resize: vertical; }
+    label.row { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin: 8px 0; cursor: pointer; }
+    label.row input { margin-top: 3px; }
+    #status { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #14130F; color: #F5F2EB; border-radius: 10px; padding: 8px 16px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+    #status.show { opacity: 1; }
+    a { color: #2340C6; }
+    .foot { margin-top: 32px; font-size: 11px; color: #5F5B53; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>SceneRecap settings</h1>
+
+    <h2>Never record on these domains</h2>
+    <textarea id="blocklist" placeholder="bank.example.com&#10;healthcare.example.org" aria-label="Blocked domains, one per line"></textarea>
+    <p class="hint">One domain per line. Blocking a domain also blocks its subdomains. Recording is refused on these sites — from the popup and from the keyboard shortcut — and a recording in progress stops if the tab navigates to one. Incognito windows are never recordable, on any domain.</p>
+
+    <h2>Capture</h2>
+    <label class="row"><input type="checkbox" id="capture-console" /> <span>Capture console errors and failed network requests<br /><span class="hint">Used as evidence in Bug Report mode (method, path and status only — never request bodies, headers or values). Turning this off leaves clicks and navigation capture unchanged.</span></span></label>
+
+    <h2>Defaults</h2>
+    <select id="default-mode" aria-label="Default AI mode">
+      <option value="explain">Explain — what happened</option>
+      <option value="bug_report">Bug report — repro steps</option>
+      <option value="tutorial">Tutorial — step-by-step</option>
+      <option value="recap">Recap — decisions &amp; actions</option>
+    </select>
+    <p class="hint">Used by the keyboard shortcut and pre-selected in the popup. The popup remembers your last choice automatically.</p>
+    <label class="row"><input type="checkbox" id="default-mic" /> <span>Microphone on by default for the keyboard shortcut</span></label>
+
+    <p class="foot">Passwords are never captured and plain typing is never logged, regardless of these settings. Delete any recording and its data from the dashboard, or your whole account from <a href="#" id="settings-link" target="_blank">account settings</a>.</p>
+  </div>
+  <div id="status">Saved</div>
+  <script src="options.js"></script>
+</body>
+</html>

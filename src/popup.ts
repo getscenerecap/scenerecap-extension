@@ -16,6 +16,11 @@ async function micGranted(): Promise<boolean> {
 async function render() {
   const { accessToken } = await getTokens();
   const state = (await chrome.runtime.sendMessage({ kind: "popup:state" })) as { recording: boolean; startedAt: number };
+  // Pre-select the remembered mode (§3.5) — the select otherwise resets to "explain" every open.
+  void import("./lib/settings.js").then(({ getSettings }) => getSettings().then((s) => {
+    const sel = document.getElementById("mode") as HTMLSelectElement | null;
+    if (sel && !state.recording) sel.value = s.defaultMode;
+  })).catch(() => {});
 
   $("auth-row").textContent = "";
   if (accessToken) {
@@ -60,6 +65,8 @@ async function render() {
         window.close();
       } else {
         const mode = ($("mode") as HTMLSelectElement).value;
+        // "default remembered" (§3.5): the next popup open and the keyboard shortcut follow suit.
+        void import("./lib/settings.js").then(({ saveSettings }) => saveSettings({ defaultMode: mode })).catch(() => {});
         const mic = micBox.checked;
         if (mic && !(await micGranted())) {
           // Permission revoked since the box was ticked — re-run the grant flow instead of

@@ -6,6 +6,7 @@
  * - Buffers telemetry events; hands everything to the review page on stop
  */
 import { APP_URL } from "./lib/api.js";
+import { getSettings, isBlockedHost } from "./lib/settings.js";
 
 interface SessionState {
   recording: boolean;
@@ -39,6 +40,14 @@ async function startRecording(opts: { mode: string; mic: boolean }) {
   if (tab.incognito) {
     return { ok: false, error: "Recording is disabled in incognito windows" };
   }
+  // User blocklist (§3.4): checked HERE, the single choke point, so the popup path and the keyboard
+  // shortcut cannot disagree about which sites are off-limits.
+  try {
+    const { blockedDomains } = await getSettings();
+    if (blockedDomains.length && isBlockedHost(new URL(tab.url).hostname, blockedDomains)) {
+      return { ok: false, error: "This domain is on your never-record list (extension settings)." };
+    }
+  } catch { /* settings unreadable -> do not block */ }
 
   const streamId = await new Promise<string>((resolve, reject) => {
     chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id! }, (id) => {
@@ -141,7 +150,11 @@ chrome.runtime.onMessage.addListener((msg: { kind: string; [k: string]: unknown 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "toggle-recording") {
     if (state.recording) await stopRecording();
-    else await startRecording({ mode: "explain", mic: false });
+    else {
+      // The shortcut has no UI to pick a mode, so it uses the remembered defaults (§3.5).
+      const s = await getSettings();
+      await startRecording({ mode: s.defaultMode, mic: s.defaultMic });
+    }
   }
 });
 
@@ -152,6 +165,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (!state.recording || tabId !== state.tabId) return;
   if (changeInfo.url) {
     const url = new URL(changeInfo.url);
+    // Mid-recording navigation onto a never-record domain stops the recording — the blocklist is a
+    // promise about the domain, not about where the recording happened to start.
+    void getSettings().then((s) => {
+      if (s.blockedDomains.length && isBlockedHost(url.hostname, s.blockedDomains)) void stopRecording();
+    }).catch(() => { /* settings unreadable -> keep recording */ });
     state.events.push({ type: "navigation", t: Date.now() - state.startedAt, url: url.pathname, title: tab.title?.slice(0, 200), spa: false });
   }
   if (changeInfo.status === "loading" || changeInfo.status === "complete") {
