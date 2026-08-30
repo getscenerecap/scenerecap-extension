@@ -1,0 +1,16 @@
+# SceneRecap for GitHub — config for the public extension mirror.
+#
+# THIS FILE MUST LIVE HERE, IN THE MONOREPO. scripts/publish-extension-mirror.sh publishes
+# getscenerecap/scenerecap-extension with `git push --force` of a subtree split of apps/extension,
+# so anything committed directly on the mirror is destroyed by the next publish. Because the split
+# makes apps/extension the repo root, this lands at .github/scenerecap.yml over there.
+#
+# What it authorises: the origins an issue may point at for us to attempt a reproduction. Empty (or
+# absent) means NONE — the App reads every issue and skips every one of them. See
+# docs/growth/GITHUB_APP_SPEC.md.
+origins:
+  - https://scenerecap.com
+
+# `label:` would narrow us to issues carrying it. Left unset on purpose: this repo is the dogfood
+# target, and seeing what the App makes of EVERY opened issue is the entire point of shadow mode.
+# paused: true is the instant off switch, and takes effect on the next issue — nothing is cached.
