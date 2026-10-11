@@ -1,4 +1,4 @@
-import { api, uploadBlob, getTokens, APP_URL } from "./lib/api.js";
+import { api, uploadBlob, getTokens, APP_URL, ApiError, uploadPlan, fmtClock, type UploadPlan } from "./lib/api.js";
 import { emptyEdits, hasEdits, toManifest, keptSeconds, type EditState } from "./redact.js";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -25,6 +25,23 @@ async function main() {
   // in this page until upload; the manifest rides along as a sidecar and the pipeline applies it.
   const edits: EditState = emptyEdits();
   const dur = Math.max(0.1, review.durationMs / 1000);
+  // What the plan is judged on is the clip AFTER cuts. Sending the untrimmed length made "cut it
+  // down" a dead end: a paying customer trimmed to fit the free minute and was refused again
+  // (2026-10-11), the same trap the web upload page had until 47fba1d.
+  const uploadSec = () => (edits.cuts.length ? Math.round(keptSeconds(edits.cuts, dur)) : durSec);
+  const upgradeLink = `<a href="${APP_URL}/dashboard/billing" target="_blank">upgrade</a>`;
+  let plan: UploadPlan | null = null;
+  const renderLimit = () => {
+    const box = $("limit");
+    const over = plan !== null && uploadSec() > plan.maxDurationSec;
+    box.hidden = !over;
+    if (over && plan) {
+      box.innerHTML = `This clip is ${fmtClock(uploadSec())}. Your ${plan.plan === "free" ? "Free" : plan.plan} plan takes recordings up to ${fmtClock(plan.maxDurationSec)}: use <b>Cut</b> above to remove ${fmtClock(uploadSec() - plan.maxDurationSec)} or more, or ${upgradeLink}.`;
+    }
+  };
+  if ((await getTokens()).accessToken) {
+    void uploadPlan().then((p) => { plan = p; renderLimit(); }).catch(() => {});
+  }
   let tool: "cut" | "blur" | "mute" | null = null;
   let pendingStart: number | null = null;
   let playhead = 0;
@@ -51,6 +68,7 @@ async function main() {
     // meta line
     const keeps = edits.cuts.length ? ` · keeps ${fmtT(keptSeconds(edits.cuts, dur))}` : "";
     $("edit-meta").textContent = `${fmtT(playhead)} / ${fmtT(dur)}${keeps}`;
+    renderLimit();
     // mark button
     markBtn.hidden = !(tool === "cut" || tool === "mute");
     markBtn.textContent = pendingStart === null ? `Mark ${tool} start at playhead` : `Mark ${tool} end at playhead`;
@@ -156,14 +174,18 @@ async function main() {
     uploading = true;
     btn.disabled = true;
     try {
+      const mode = ($("mode") as HTMLSelectElement).value;
+      const manifest = toManifest(edits, dur);
+      if (hasEdits(edits) && !manifest) throw new Error("Your cuts remove the whole recording — leave something to upload, or delete it instead.");
+      // Ask the plan first: a refusal must cost a click, not a whole upload.
+      status.textContent = "Checking your plan…";
+      await api("/v1/recordings/preflight", { method: "POST", body: { mode, durationSec: uploadSec() } });
       status.textContent = "Uploading video…";
       const mediaId = await uploadBlob(blob, "recording.webm", "video/webm", "media");
       status.textContent = "Uploading activity log…";
       const eventsId = await uploadBlob(new Blob([review.eventsJsonl], { type: "application/jsonl" }), "events.jsonl", "application/jsonl", "eventlog");
       // Redaction sidecar (spec §3.4): only when the user actually edited something.
       let redactionId: string | undefined;
-      const manifest = toManifest(edits, dur);
-      if (hasEdits(edits) && !manifest) throw new Error("Your cuts remove the whole recording — leave something to upload, or delete it instead.");
       if (manifest) {
         status.textContent = "Uploading redactions…";
         redactionId = await uploadBlob(new Blob([JSON.stringify(manifest)], { type: "application/json" }), "redaction.json", "application/json", "redaction_manifest");
@@ -176,8 +198,8 @@ async function main() {
           eventLogUploadId: eventsId,
           redactionUploadId: redactionId,
           title: ($("title-input") as HTMLInputElement).value || "Untitled recording",
-          mode: ($("mode") as HTMLSelectElement).value,
-          durationSec: durSec,
+          mode,
+          durationSec: uploadSec(),
           sourceMeta: { source: "extension", version: chrome.runtime.getManifest().version },
         },
       });
@@ -186,7 +208,15 @@ async function main() {
       // Take the user to the recording; the library shows live progress until it's ready.
       await chrome.tabs.create({ url: `${APP_URL}/dashboard/r/${recording.id}` });
     } catch (e) {
-      status.textContent = e instanceof Error ? e.message : "Upload failed";
+      if (e instanceof ApiError && e.status === 402) {
+        // A plan refusal: say what the plan allows and what to do, in the server's own words.
+        const fix = /duration/i.test(e.message) && plan ? ` Use <b>Cut</b> above to bring it under ${fmtClock(plan.maxDurationSec)}, or ${upgradeLink}.` : ` To continue, ${upgradeLink}.`;
+        status.innerHTML = "";
+        status.append(document.createTextNode(e.message));
+        status.insertAdjacentHTML("beforeend", fix);
+      } else {
+        status.textContent = e instanceof Error ? e.message : "Upload failed";
+      }
       btn.disabled = false;
       uploading = false;
     }

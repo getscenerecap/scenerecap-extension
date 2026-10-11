@@ -1,4 +1,4 @@
-import { api, getTokens, APP_URL } from "./lib/api.js";
+import { api, getTokens, APP_URL, fmtClock } from "./lib/api.js";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -23,10 +23,15 @@ async function render() {
   })).catch(() => {});
 
   $("auth-row").textContent = "";
+  // The plan's length limit, said BEFORE recording rather than after the upload (2026-10-11: a
+  // customer recorded past the free minute twice and only learned the rule from a refusal).
+  let limitNote = "";
   if (accessToken) {
     try {
-      const me = await api<{ user: { email: string } }>("/v1/me");
+      const me = await api<{ user: { email: string }; workspaces: { isPersonal: boolean; plan: string; maxDurationSec?: number }[] }>("/v1/me");
       $("auth-row").textContent = me.user.email;
+      const ws = me.workspaces.find((w) => w.isPersonal);
+      if (ws?.plan === "free" && typeof ws.maxDurationSec === "number") limitNote = `Free plan: recordings up to ${fmtClock(ws.maxDurationSec)} (you can cut longer ones before upload).`;
     } catch {
       $("auth-row").innerHTML = `<a id="signin" href="#">Sign in</a>`;
     }
@@ -50,11 +55,11 @@ async function render() {
   if (state.recording) {
     btn.textContent = "■ Stop recording";
     btn.className = "btn stop";
-    ($("hint") as HTMLElement).textContent = "Recording this tab…";
+    ($("hint") as HTMLElement).textContent = limitNote ? `Recording this tab… ${limitNote}` : "Recording this tab…";
   } else {
     btn.textContent = "● Record this tab";
     btn.className = "btn start";
-    ($("hint") as HTMLElement).textContent = "Silent recordings are fully supported.";
+    ($("hint") as HTMLElement).textContent = limitNote || "Silent recordings are fully supported.";
   }
   btn.onclick = async () => {
     btn.disabled = true;

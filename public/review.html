@@ -50,6 +50,8 @@
     #edit-list li.mute { background: rgba(14,165,233,.09); }
     #edit-list button { background: none; border: 0; color: #625E56; font-size: 11px; padding: 2px 4px; }
     #edit-list button:hover { color: #B91C1C; }
+    #limit { font-size: 13px; line-height: 1.45; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.35); border-radius: 10px; padding: 9px 12px; margin: 10px 0; }
+    #limit a, #status a { color: #2340C6; }
   </style>
 </head>
 <body>
@@ -66,6 +68,7 @@
     <div id="edit-meta"></div>
     <ul id="edit-list"></ul>
     <div class="meta" id="meta"></div>
+    <div id="limit" role="status" hidden></div>
     <input id="title-input" placeholder="Title (SceneRecap will suggest one after analysis)" />
     <select id="mode">
       <option value="explain">Explain — what happened</option>

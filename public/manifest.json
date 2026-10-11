@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SceneRecap \u2014 screen recorder that explains",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Record your screen. SceneRecap watches the pixels and writes the explanation: summaries, step-by-step guides, and bug reports.",
   "minimum_chrome_version": "120",
   "action": {

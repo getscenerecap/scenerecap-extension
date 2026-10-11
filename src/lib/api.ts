@@ -32,6 +32,43 @@ async function refresh(): Promise<boolean> {
   return true;
 }
 
+/**
+ * A refused API call, carrying the server's own sentence. The API answers errors as problem+json
+ * (`detail`); this used to surface as `API 402: {"type":"about:blank",…}`, which is what a paying
+ * customer saw when their first two recordings were refused (2026-10-11).
+ */
+export class ApiError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+  }
+  static async from(res: Response): Promise<ApiError> {
+    const text = await res.text().catch(() => "");
+    let message = "";
+    try {
+      const body = JSON.parse(text) as { detail?: unknown; title?: unknown };
+      message = String(body.detail ?? body.title ?? "");
+    } catch {
+      message = text.slice(0, 200);
+    }
+    if (!message) message = res.status >= 500 ? "SceneRecap had a problem on its side. Try again in a minute." : `Request failed (${res.status}).`;
+    return new ApiError(res.status, message);
+  }
+}
+
+/** The plan of the workspace the extension uploads into (the personal one — create sends no workspaceId). */
+export interface UploadPlan { plan: string; maxDurationSec: number }
+
+export async function uploadPlan(): Promise<UploadPlan | null> {
+  const me = await api<{ workspaces: { isPersonal: boolean; plan: string; maxDurationSec?: number }[] }>("/v1/me");
+  const ws = me.workspaces.find((w) => w.isPersonal);
+  return ws && typeof ws.maxDurationSec === "number" ? { plan: ws.plan, maxDurationSec: ws.maxDurationSec } : null;
+}
+
+export const fmtClock = (sec: number): string => {
+  const s = Math.round(sec);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+
 export async function api<T = unknown>(path: string, opts: { method?: string; body?: unknown } = {}, retried = false): Promise<T> {
   const { accessToken } = await getTokens();
   const res = await fetch(`${API_URL}${path}`, {
@@ -43,10 +80,7 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
   if (res.status === 401 && !retried && (await refresh())) return api(path, opts, true);
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${text.slice(0, 200)}`);
-  }
+  if (!res.ok) throw await ApiError.from(res);
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
